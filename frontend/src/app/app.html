@@ -1,0 +1,42 @@
+<div class="exam-shell">
+  <header class="topbar"><a class="brand" href="/" aria-label="Example Exam home"><span class="brand-mark">E</span><span>EXAMPLE <b>EXAM</b></span></a><span class="secure-label"><i></i> แบบทดสอบออนไลน์</span></header>
+
+  <main class="exam-content">
+    @if (page() === 'quiz') {
+      <section class="intro"><p class="eyebrow">KNOWLEDGE CHECK <span>•</span> QUESTION 10-1</p><h1>พร้อมเริ่มทำข้อสอบไหม?</h1><p>กรอกชื่อและเลือกคำตอบที่ถูกต้องเพียงหนึ่งข้อในแต่ละคำถาม</p></section>
+      @if (errorMessage(); as message) { <div class="error-banner" role="alert">{{ message }}</div> }
+      <section class="quiz-card" aria-label="แบบทดสอบ">
+        <div class="quiz-card-head"><div><h2>แบบทดสอบความรู้ทั่วไป</h2><p>{{ questions().length }} คำถาม <span>·</span> เลือกคำตอบได้ข้อละ 1 ข้อ</p></div><span class="question-count">{{ questions().length }} <small>ข้อ</small></span></div>
+        <div class="name-field"><label for="participantName">ชื่อผู้เข้าสอบ <span>*</span></label><input id="participantName" type="text" maxlength="100" autocomplete="name" [value]="participantName()" (input)="updateParticipantName($event)" placeholder="กรอกชื่อของคุณ" /></div>
+        @if (loading()) { <div class="loading-state"><span class="spinner"></span> กำลังโหลดข้อสอบ…</div> }
+        @else { <div class="question-list">
+          @for (question of questions(); track question.id) {
+            <fieldset class="question-block" [attr.data-question-id]="question.id">
+              <legend><span class="question-index">{{ question.position | number:'2.0' }}</span><span>{{ question.prompt }}</span></legend>
+              <div class="option-list">
+                @for (option of question.options; track option.key) {
+                  <label class="option-row" [class.option-selected]="selectedOption(question.id) === option.key"><input type="radio" [attr.name]="'question-' + question.id" [value]="option.key" [checked]="selectedOption(question.id) === option.key" (change)="selectAnswer(question.id, option.key)" /><span class="option-key">{{ option.key }}</span><span class="option-text">{{ option.text }}</span><span class="radio-mark" aria-hidden="true"></span></label>
+                }
+              </div>
+            </fieldset>
+          }
+        </div> }
+        <footer class="quiz-actions"><p><span>*</span> กรุณาตอบคำถามให้ครบก่อนส่งข้อสอบ</p><button class="submit-button" type="button" (click)="submitQuiz()" [disabled]="!canSubmit()">{{ submitting() ? 'กำลังส่ง…' : 'ส่งข้อสอบ' }} <span aria-hidden="true">→</span></button></footer>
+      </section>
+      <div class="privacy-note"><span aria-hidden="true">⌑</span> ผลสอบจะถูกบันทึกเพื่อแสดงคะแนนและคำตอบที่เลือก</div>
+    } @else {
+      @if (errorMessage(); as message) { <div class="error-banner" role="alert">{{ message }}</div> }
+      <section class="result-card" aria-labelledby="result-title">
+        <div class="result-mark" aria-hidden="true">✓</div><p class="eyebrow">RESULT SUMMARY <span>•</span> QUESTION 10-2</p><h1 id="result-title">ส่งข้อสอบเรียบร้อย</h1><p class="result-greeting">ขอบคุณที่ร่วมทำแบบทดสอบ <strong>{{ attempt()?.participantName }}</strong></p>
+        <div class="score-panel"><div class="score-copy"><span>คะแนนรวม</span><strong>{{ attempt()?.score }} <small>/ {{ attempt()?.totalQuestions }}</small></strong></div><div class="score-track" role="progressbar" [attr.aria-valuenow]="attempt()?.score" [attr.aria-valuemax]="attempt()?.totalQuestions"><span [style.width.%]="attempt() ? (attempt()!.score / attempt()!.totalQuestions) * 100 : 0"></span></div><small class="score-caption">{{ attempt()?.score }} คะแนนจาก {{ attempt()?.totalQuestions }} ข้อ</small></div>
+        <div class="answer-review"><div class="review-heading"><h2>คำตอบที่เลือก</h2><span>{{ attempt()?.answers?.length }} คำถาม</span></div>
+          @for (answer of attempt()?.answers ?? []; track answer.questionId) {
+            <article class="result-answer" [attr.data-answer-question-id]="answer.questionId"><span class="result-question-number">{{ answer.position | number:'2.0' }}</span><div class="result-answer-copy"><h3>{{ answer.prompt }}</h3><p>คำตอบที่เลือก <strong><i>{{ answer.selectedOption }}</i> {{ answer.selectedText }}</strong></p></div><span class="answer-status" [class.answer-correct]="answer.isCorrect">{{ answer.isCorrect ? 'ถูกต้อง' : 'ยังไม่ถูก' }}</span></article>
+          }
+        </div>
+        <button class="retake-button" type="button" (click)="retake()">สอบอีกครั้ง <span aria-hidden="true">↻</span></button>
+      </section>
+    }
+    <footer class="page-footer">EXAMPLE EXAM <span>·</span> ผลสอบของคุณจะถูกบันทึกอย่างปลอดภัย</footer>
+  </main>
+</div>
